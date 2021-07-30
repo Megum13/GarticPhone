@@ -20,4 +20,4 @@ GarticPicture - программа для читерной загрузки ка
 Кнопка "Done" - подтверждает готовность (нажимать не обязательно, после каждого действия она жмется автоматически).  
 Animation mode - переключает на режим рисования кистью для режима анимации (требует немного больше времени на отправку и увеличивает нагрузку на устройства игроков)  
 
-[Скачать](https://github.com/Megum13/GarticPicture/releases/download/v1.2/GarticPicture.rar)
+[Скачать](https://github.com/Megum13/GarticPicture/releases/download/v1.2 /GarticPicture.rar)
