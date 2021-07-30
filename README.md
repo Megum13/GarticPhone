@@ -13,4 +13,4 @@ GarticPicture - программа для читерной загрузки ка
 Кнопка "Send text" - отправляет текст введеный в поле выше.  
 Кнопка "Done" - подтверждает готовность (нажимать не обязательно, после каждого действия она жмется автоматически).
 
-[Скачать](https://github.com/Megum13/GarticPicture/releases/download/v1.0/GarticPicture.rar)
+[Скачать](https://github.com/Megum13/GarticPicture/releases/download/v1.1/GarticPicture.rar)
