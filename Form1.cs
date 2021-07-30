@@ -1,123 +1,63 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using WebSocketSharp;
 
-namespace WevSocketScetchful
+namespace GarticPicture
 {
     public partial class Form1 : Form
     {
         public string url = null;
-        WebSocket ws;
-        int turnNum = 0;
+
         string[] files;
 
-        Random ran = new Random();
+        SocketIO socketIO;
+        string directory = "Img";
+        int directoryValue = 0;
+        int directoryValueMax = 0;
+        int directoryValueMin = 0;
 
         public Form1()
         {
             InitializeComponent();
+            DirectoryValueChanged(0);
 
-            files = Directory.GetFiles("Img");
-            numericUpDown1.Maximum = files.Length - 1;
-
-            pictureBox1.Image = Image.FromFile(files[(int)numericUpDown1.Value]);
+            socketIO = new SocketIO(this); // Общение с сокетом [Connect] [Disconnect] [Send] [DrawImage]
         }
 
-        private void button3_Click(object sender, EventArgs e) // connect
+        private void button3_Click(object sender, EventArgs e) // Connect button
         {
-            ws = new WebSocket(url = $"wss://sv-{textBox3.Text}.garticphone.com/socket.io/?EIO=4&transport=websocket");
-
-            ws.OnMessage -= MessageSocket;
-            ws.OnMessage += MessageSocket;
-
-            ws.Connect();
-
-            Thread th = new Thread(() => SocketRe());
-            th.IsBackground = true;
-            th.Start();
-
-
-            string[] s = textBox2.Text.Split('=');
-
-            ws.Send("40");
-            SendToTextBox("40");
-            ws.Send($"42[1,\"{"bfcc9fd4-e2a2-44db-a6e4-0d05eed1fb0e" + ran.Next(0, 1000)}\",\"{textBox1.Text}\",{ran.Next(1, 30)},\"ru\",false,\"{textBox2.Text}\"]");
-            SendToTextBox($"42[1,\"{"bfcc9fd4-e2a2-44db-a6e4-0d05eed1fb0e" + ran.Next(0, 1000)}\",\"{textBox1.Text}\",{ran.Next(1, 30)},\"ru\",false,\"{textBox2.Text}\"]");
-
-
+            var result = socketIO.Connect(textBox3.Text, textBox1.Text, textBox2.Text);
+            SendToTextBox(result);
         }
 
-        public void DrawImage(int x, int y, int width, int height)
+        private void button8_Click(object sender, EventArgs e) // Disconect button
         {
-
-            Image img = Image.FromFile(files[(int)numericUpDown1.Value]);
-            Bitmap btm = new Bitmap(img, width, height);
-
-            for (int Y = 0; Y < height; Y += 2)
-            {
-                for (int X = 0; X < width; X += 2)
-                {
-
-                    var pixel = btm.GetPixel(X, Y);
-
-
-                    string hex = pixel.R.ToString("X2") + pixel.G.ToString("X2") + pixel.B.ToString("X2");
-
-                    if (!(pixel.R == 255 && pixel.G == 255 && pixel.B == 255))
-                    {
-                        ws.Send($"42[2,7,{{\"t\":{turnNum},\"v\":[6,[\"#{hex}\",1,1],[{X + x},{Y + y}] , [{X + 2 + x},{Y + 2 + y}]]}}]");
-                    }
-
-                }
-            }
-
-            SendToTextBox("Отправка на холст пикчи завершена");
-            SendToTextBox("42[2,15,true] (You)");
-            ws.Send("42[2,15,true]");
-
+            var result = socketIO.Disconnect();
+            SendToTextBox(result);
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e) // Draw button
         {
-            Thread th = new Thread(() => DrawImage(0, 0, 758, 424));
-            th.IsBackground = true;
-            th.Start();
+            var result = socketIO.DrawImage(Image.FromFile(files[directoryValue]));
+            SendToTextBox(result);
         }
 
-        void MessageSocket(object sender, MessageEventArgs e)
+        private void button2_Click(object sender, EventArgs e) // Done button
         {
-
-            if (e.IsText)
-            {
-                // 42[1,{"error":3}]
-                char[] charData = e.Data.ToCharArray();
-
-                if (e.Data != null)
-                {
-                    SendToTextBox(e.Data);
-                }
-
-                if (charData.Length >= 21 && charData[5] == '1' && charData[6] == '1')
-                {
-                    string[] a = e.Data.Split(',');
-                    string[] b = a[2].Split(':');
-                    turnNum = Int32.Parse(b[1].ToString());
-                }
-
-            }
-
+            var result = socketIO.Send("42[2,15,true]");
+            SendToTextBox(result);
         }
 
-        void SendToTextBox(string text)
+        private void button4_Click(object sender, EventArgs e) // Send text button
+        {
+            var result = socketIO.Send(textBox5.Text);
+            SendToTextBox(result);
+        }
+
+        public void SendToTextBox(string text)
         {
             Invoke(new Action(() =>
             {
@@ -129,48 +69,49 @@ namespace WevSocketScetchful
             }));
         }
 
-        void SocketRe()
+        private void DirectoryValueChanged(int change)
         {
-            while (true)
-            {
-                if (ws.IsAlive)
-                {
-                    try
-                    {
-                        ws.Send("3");
-                        SendToTextBox("3");
-                        Thread.Sleep(25000);
-                    }
-                    catch
-                    {
-                    }
+            directoryValue += change; // Изменяем значение (если не 0)
 
-                }
+            files = Directory.GetFiles(directory); // Берем пикчи
+            directoryValueMax = files.Length - 1; // Выставляем макс значение
+
+            if (directoryValue >= directoryValueMax) directoryValue = directoryValueMax; // Проверка ограничений
+            else if (directoryValue <= directoryValueMin) directoryValue = directoryValueMin;
+
+            label5.Text = directoryValue + ""; // Вывод информации
+            pictureBox1.Image = Image.FromFile(files[directoryValue]); // Вывод картинки
+        }
+
+        private void button5_Click(object sender, EventArgs e) // Directory change right
+        {
+            DirectoryValueChanged(1);
+        }
+
+        private void button6_Click(object sender, EventArgs e) // Directory change left
+        {
+            DirectoryValueChanged(-1);
+        }
+
+        private void button7_Click(object sender, EventArgs e) // Connect information visible/unvisible
+        {
+            panel1.Visible = panel1.Visible ? panel1.Visible = false : panel1.Visible = true;
+        }
+
+        public void ConnectInformationButton(bool isTrue)
+        {
+            if (isTrue)
+            {
+                button7.Text = "Подключено";
+                button7.ForeColor = Color.Green;
+            }
+            else 
+            {
+                button7.Text = "Не подключено";
+                button7.ForeColor = Color.Red;
             }
         }
 
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            ws.Send("42[2,15,true]");
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-
-            ws.Send($"42[2,6,{{\"t\":{turnNum},\"v\":\"{textBox5.Text}\"}}]");
-            ws.Send("42[2,15,true]");
-
-        }
-
-        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
-        {
-            files = Directory.GetFiles("Img");
-            numericUpDown1.Maximum = files.Length - 1;
-
-            pictureBox1.Image = Image.FromFile(files[(int)numericUpDown1.Value]);
-        }
-        
     }
 
 }
