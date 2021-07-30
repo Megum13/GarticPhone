@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using WebSocketSharp;
 
 namespace GarticPicture
@@ -41,6 +37,7 @@ namespace GarticPicture
                     if (isConnected)
                     {
                         ws.Send("3");
+                        form1.SendToTextBox("3", Color.Green);
                     }
                     Thread.Sleep(25000);
                 }
@@ -50,17 +47,17 @@ namespace GarticPicture
         }
 
 
-        public string Connect(string socket , string nick, string roomCode)
+        public string Connect(string socket, string nick, string roomCode)
         {
-            if (isConnected) return Disconnect();
+            if (isConnected && !form1.dos) return Disconnect();
 
             ws = new WebSocket($"wss://sv-{socket}.garticphone.com/socket.io/?EIO=4&transport=websocket");
 
             ws.OnMessage -= MessageSocket;
             ws.OnMessage += MessageSocket;
 
-            try 
-            { 
+            try
+            {
                 ws.Connect();
             }
             catch
@@ -69,8 +66,11 @@ namespace GarticPicture
                 return "Подключение не удалось";
             }
 
+            var sendConnect = $"42[1,\"{"bfcc9fd4-e2a2-44db-a6e4-0d05eed1fb0e" + ran.Next(0, 1000)}\",\"{nick}\",{ran.Next(1, 30)},\"ru\",false,\"{roomCode}\"]";
             ws.Send("40");
-            ws.Send($"42[1,\"{"bfcc9fd4-e2a2-44db-a6e4-0d05eed1fb0e" + ran.Next(0, 1000)}\",\"{nick}\",{ran.Next(1, 30)},\"ru\",false,\"{roomCode}\"]");
+            form1.SendToTextBox("40", Color.Green);
+            ws.Send(sendConnect);
+            form1.SendToTextBox(sendConnect, Color.Green);
 
             form1.ConnectInformationButton(true);
             return "Подключено";
@@ -80,8 +80,15 @@ namespace GarticPicture
         {
             if (!isConnected) return "Нет подключения";
 
+            ws.Send("42[2,28]");
+            form1.SendToTextBox("42[2,28]", Color.Green);
+            ws.Send("41");
+            form1.SendToTextBox("41", Color.Green);
             ws.Close();
+
             form1.ConnectInformationButton(false);
+            turnNum = 0;
+
             return "Отключено";
         }
 
@@ -89,7 +96,10 @@ namespace GarticPicture
         {
             if (!isConnected) return "Нет подключения";
 
-            ws.Send(text);
+            ws.Send($"42[2,6,{{\"t\":{turnNum},\"v\":\"{text}\"}}]");
+            form1.SendToTextBox($"42[2,6,{{\"t\":{turnNum},\"v\":\"{text}\"}}]", Color.Green);
+            ws.Send("42[2,15,true]");
+            form1.SendToTextBox("42[2,15,true]", Color.Green);
 
             return "Отправлено";
         }
@@ -98,7 +108,7 @@ namespace GarticPicture
         {
             if (!isConnected) return "Нет подключения";
 
-            Thread th = new Thread(() => 
+            Thread th = new Thread(() =>
             {
                 Bitmap btm = new Bitmap(img, 758, 424);
 
@@ -113,13 +123,17 @@ namespace GarticPicture
 
                         if (!(pixel.R == 255 && pixel.G == 255 && pixel.B == 255))
                         {
-                            ws.Send($"42[2,7,{{\"t\":{turnNum},\"v\":[6,[\"#{hex}\",1,1],[{X},{Y}] , [{X + 2},{Y + 2}]]}}]");
+                            if (form1.animationMode) 
+                                ws.Send($"42[2,7,{{\"t\":{turnNum},\"v\":[1,[\"#{hex}\",3,1],[{X},{Y}] , [{X + 2},{Y + 2}]]}}]"); // Режим кисти
+                            else
+                                ws.Send($"42[2,7,{{\"t\":{turnNum},\"v\":[6,[\"#{hex}\",1,1],[{X},{Y}] , [{X + 2},{Y + 2}]]}}]"); // Режим прямоугольников
                         }
 
                     }
                 }
 
                 ws.Send("42[2,15,true]");
+                form1.SendToTextBox("42[2,15,true]", Color.Green);
                 form1.SendToTextBox("Изображение успешно отправлено");
             });
             th.IsBackground = true;
@@ -134,11 +148,12 @@ namespace GarticPicture
 
             if (e.IsText)
             {
+
                 char[] charData = e.Data.ToCharArray();
 
                 if (e.Data != null)
                 {
-                    form1.SendToTextBox(e.Data);
+                    form1.SendToTextBox(e.Data, Color.Red);
                 }
 
                 if (charData.Length >= 21 && charData[5] == '1' && charData[6] == '1')
@@ -152,5 +167,13 @@ namespace GarticPicture
 
         }
 
+
+        /// 42[2,5,2] начало раунда
+        /// 42[2,11,{"turnNum":1,"screen":5,"previous":{"id":-1,"user":{"id":1,"nick":"01","avatar":"19","owner":true,"viewer":false,"points":0,"change":0},"type":2,"data":"да","active":true}}] Ход со строки на рисование
+        /// 42[2,24] раунд закончен
+        /// 42[2,11,{"turnNum":0,"screen":5,"previous":null}] ход рисования
+        /// 42[2,11,{"turnNum":1,"screen":4,"previous":{"id":-1,"user":{"id":1,"nick":"01","avatar":"19","owner":true,"viewer":false,"points":0,"change":0},"type":1,"data":[[1,["#000000",6,1],[391,55]]],"active":true}}] пришло для комментирования
+
     }
+
 }
