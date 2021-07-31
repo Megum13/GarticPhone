@@ -132,7 +132,7 @@ namespace GarticPicture
 
                         if (!(pixel.R == 255 && pixel.G == 255 && pixel.B == 255))
                         {
-                            if (form1.animationMode) 
+                            if (form1.animationMode)
                                 ws.Send($"42[2,7,{{\"t\":{turnNum},\"v\":[1,[\"#{hex}\",3,1],[{X},{Y}] , [{X + 2},{Y + 2}]]}}]"); // Режим кисти
                             else
                                 ws.Send($"42[2,7,{{\"t\":{turnNum},\"v\":[6,[\"#{hex}\",1,1],[{X},{Y}] , [{X + 2},{Y + 2}]]}}]"); // Режим прямоугольников
