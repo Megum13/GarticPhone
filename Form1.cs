@@ -157,6 +157,24 @@ namespace GarticPicture
         {
             animationMode = checkBox3.Checked;
         }
+
+        public void InformationChanger(int number , string text) // 0 - 5
+        {
+            Label[] labels = { label6, label7, label8, label9, label10, label11};
+
+            if (number < 0 || number > labels.Length) // На всякий
+            {
+                Console.WriteLine("Вышло за пределы");
+                return;
+            }
+
+            Invoke(new Action(() => 
+            { 
+                labels[number].Text = text;
+            }));
+
+        }
+
     }
     public static class RichTextBoxExtensions
     {
