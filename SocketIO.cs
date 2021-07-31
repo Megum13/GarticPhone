@@ -73,6 +73,10 @@ namespace GarticPicture
             form1.SendToTextBox(sendConnect, Color.Green);
 
             form1.ConnectInformationButton(true);
+
+            form1.InformationChanger(0, $"Nick: {nick}");
+            form1.InformationChanger(1, $"Room: {roomCode}  -  {socket}");
+
             return "Подключено";
         }
 
@@ -88,6 +92,11 @@ namespace GarticPicture
 
             form1.ConnectInformationButton(false);
             turnNum = 0;
+
+            form1.InformationChanger(0, "Nick: Unknown");
+            form1.InformationChanger(1, "Room: Unknown");
+            form1.InformationChanger(2, "Game status: Unknown");
+            form1.InformationChanger(3, "Round: Unknown");
 
             return "Отключено";
         }
@@ -149,18 +158,27 @@ namespace GarticPicture
             if (e.IsText)
             {
 
-                char[] charData = e.Data.ToCharArray();
-
                 if (e.Data != null)
                 {
                     form1.SendToTextBox(e.Data, Color.Red);
                 }
 
-                if (charData.Length >= 21 && charData[5] == '1' && charData[6] == '1')
+                if (e.Data.Contains("42[2,11,{")) // Начало нового раунда
                 {
                     string[] a = e.Data.Split(',');
                     string[] b = a[2].Split(':');
                     turnNum = Int32.Parse(b[1].ToString());
+                    form1.InformationChanger(3, $"Round: {turnNum}");
+                }
+
+                else if (e.Data.Contains("42[2,5,2]")) // Начало игры
+                {
+                    form1.InformationChanger(2, "Game status: Started");
+                }
+
+                else if (e.Data.Contains("42[2,24]")) // Конец игры
+                {
+                    form1.InformationChanger(2, "Game status: Over");
                 }
 
             }
