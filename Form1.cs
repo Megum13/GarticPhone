@@ -18,19 +18,20 @@ namespace GarticPicture
         public Form1()
         {
             InitializeComponent();
-            DirectoryValueChanged(0);
 
             ToolTip t = new ToolTip();
             t.SetToolTip(checkBox1, "Режим дудоса, при повторном нажатии на Connect - Disconnect производиться не будет");
 
             socketIO = new SocketIO(this); // Общение с сокетом [Connect] [Disconnect] [Send] [DrawImage]
         }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            DirectoryValueChanged(0); // Первая подгрузка пикч
+        }
 
         private void button3_Click(object sender, EventArgs e) // Connect button
         {
-            if (textBox2.Text.Contains("?c=")) textBox2.Text = textBox2.Text.Split('=')[1];
-
-            var result = socketIO.Connect(textBox3.Text, textBox1.Text, textBox2.Text);
+            var result = socketIO.Connect(textBox1.Text, textBox2.Text);
             SendToTextBox(result);
         }
 
@@ -42,6 +43,13 @@ namespace GarticPicture
 
         private void button1_Click(object sender, EventArgs e) // Draw button
         {
+
+            if (directoryValueMax <= 0)
+            {
+                SendToTextBox("Нет картинок");
+                return;
+            }
+
             var result = socketIO.DrawImage(Image.FromFile(files[directoryValue]));
             SendToTextBox(result);
         }
@@ -84,9 +92,25 @@ namespace GarticPicture
         {
             directoryValue += change; // Изменяем значение или не изменяем если 0
 
+            if (!Directory.Exists(directory)) // Если нет, создаём
+            {
+                Directory.CreateDirectory(directory);
+            }
+
             files = Directory.GetFiles(directory); // Берем пикчи
 
-            directoryValueMax = files.Length - 1; // Выставляем макс значение
+            directoryValueMax = files.Length-1; // Выставляем макс значение
+
+            // Костыльное решение. ИСПРАВИТЬ!
+            if (directoryValueMax == -1)
+            {
+                SendToTextBox("Нет картинок");
+                return;
+            }
+            else if (directoryValueMax == 0)
+            {
+                directoryValue = 0;
+            }
 
             if (directoryValue >= directoryValueMax) directoryValue = directoryValueMax; // Проверка ограничений
             else if (directoryValue <= directoryValueMin) directoryValue = directoryValueMin;
@@ -141,12 +165,6 @@ namespace GarticPicture
             richTextBox1.Text = "";
         }
 
-        private void textBox3_Click(object sender, EventArgs e) // Выделение текста для удобства
-        {
-            textBox3.SelectionStart = 0;
-            textBox3.SelectionLength = textBox3.Text.Length;
-        }
-
         private void textBox2_Click(object sender, EventArgs e) // Выделение текста для удобства
         {
             textBox2.SelectionStart = 0;
@@ -175,6 +193,10 @@ namespace GarticPicture
 
         }
 
+        private void button10_Click(object sender, EventArgs e) // открыть папку
+        {
+            System.Diagnostics.Process.Start(directory);
+        }
     }
     public static class RichTextBoxExtensions
     {

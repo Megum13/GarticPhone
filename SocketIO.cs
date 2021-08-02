@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Net;
 using System.Threading;
 using WebSocketSharp;
 
@@ -47,11 +48,36 @@ namespace GarticPicture
         }
 
 
-        public string Connect(string socket, string nick, string roomCode)
+        public string Connect(string nick, string roomLink)
         {
             if (isConnected && !form1.dos) return Disconnect();
 
-            ws = new WebSocket($"wss://sv-{socket}.garticphone.com/socket.io/?EIO=4&transport=websocket");
+            if (nick == null || nick == "") return "Ник не может быть пустым (хочешь пустой ставь пробел)";
+
+            var roomCode = "";
+            if (roomLink.Contains("?c=")) roomCode = roomLink.Split('=')[1];
+            else
+            {
+                return "Ошибка связанная с ссылкой";
+            }
+
+            var response = "";
+
+            using (var webClient = new WebClient()) // Получаем sv-
+            {
+                try
+                {
+                    response = webClient.DownloadString($"https://garticphone.com/api/server?code={"" + roomCode + ""}"); // https://sv-43.garticphone.com
+                }
+                catch (Exception ex)
+                {
+                    form1.SendToTextBox("ОШИБКА");
+                    return ex.Message;
+                }
+            }
+
+            var cutResponseLink = response.Substring(5, response.Length-5);
+            ws = new WebSocket($"wss{cutResponseLink}/socket.io/?EIO=4&transport=websocket");
 
             ws.OnMessage -= MessageSocket;
             ws.OnMessage += MessageSocket;
@@ -75,7 +101,6 @@ namespace GarticPicture
             form1.ConnectInformationButton(true);
 
             form1.InformationChanger(0, $"Nick: {nick}");
-            form1.InformationChanger(1, $"Room: {roomCode}  -  {socket}");
 
             return "Подключено";
         }
