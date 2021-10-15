@@ -45,13 +45,13 @@
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.button8 = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.button10 = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.button6 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.button7 = new System.Windows.Forms.Button();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.button9 = new System.Windows.Forms.Button();
-            this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
@@ -59,7 +59,6 @@
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
-            this.button10 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -230,6 +229,18 @@
             this.panel2.Size = new System.Drawing.Size(336, 275);
             this.panel2.TabIndex = 25;
             // 
+            // button10
+            // 
+            this.button10.BackColor = System.Drawing.Color.Transparent;
+            this.button10.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button10.BackgroundImage")));
+            this.button10.Image = ((System.Drawing.Image)(resources.GetObject("button10.Image")));
+            this.button10.Location = new System.Drawing.Point(290, 246);
+            this.button10.Name = "button10";
+            this.button10.Size = new System.Drawing.Size(28, 23);
+            this.button10.TabIndex = 29;
+            this.button10.UseVisualStyleBackColor = false;
+            this.button10.Click += new System.EventHandler(this.button10_Click);
+            // 
             // label5
             // 
             this.label5.Location = new System.Drawing.Point(131, 246);
@@ -292,17 +303,6 @@
             this.button9.UseVisualStyleBackColor = true;
             this.button9.Click += new System.EventHandler(this.button9_Click);
             // 
-            // checkBox3
-            // 
-            this.checkBox3.AutoSize = true;
-            this.checkBox3.Location = new System.Drawing.Point(341, 6);
-            this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(101, 17);
-            this.checkBox3.TabIndex = 29;
-            this.checkBox3.Text = "Animation mode";
-            this.checkBox3.UseVisualStyleBackColor = true;
-            this.checkBox3.CheckedChanged += new System.EventHandler(this.checkBox3_CheckedChanged);
-            // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.label11);
@@ -364,24 +364,11 @@
             this.label6.TabIndex = 0;
             this.label6.Text = "Nick: Unknown";
             // 
-            // button10
-            // 
-            this.button10.BackColor = System.Drawing.Color.Transparent;
-            this.button10.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button10.BackgroundImage")));
-            this.button10.Image = ((System.Drawing.Image)(resources.GetObject("button10.Image")));
-            this.button10.Location = new System.Drawing.Point(290, 246);
-            this.button10.Name = "button10";
-            this.button10.Size = new System.Drawing.Size(28, 23);
-            this.button10.TabIndex = 29;
-            this.button10.UseVisualStyleBackColor = false;
-            this.button10.Click += new System.EventHandler(this.button10_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1059, 452);
-            this.Controls.Add(this.checkBox3);
             this.Controls.Add(this.button9);
             this.Controls.Add(this.checkBox2);
             this.Controls.Add(this.button7);
@@ -429,7 +416,6 @@
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.Button button9;
-        private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label10;
