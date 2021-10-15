@@ -11,7 +11,6 @@ namespace GarticPicture
 
         string[] files;
         public bool dos = false;
-        public bool animationMode = false;
 
         SocketIO socketIO;
 
@@ -169,11 +168,6 @@ namespace GarticPicture
         {
             textBox2.SelectionStart = 0;
             textBox2.SelectionLength = textBox2.Text.Length;
-        }
-
-        private void checkBox3_CheckedChanged(object sender, EventArgs e) // Режим анимации
-        {
-            animationMode = checkBox3.Checked;
         }
 
         public void InformationChanger(int number , string text) // 0 - 5
