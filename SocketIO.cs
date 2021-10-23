@@ -79,8 +79,11 @@ namespace GarticPicture
             var cutResponseLink = response.Substring(5, response.Length-5);
             ws = new WebSocket($"wss{cutResponseLink}/socket.io/?EIO=4&transport=websocket");
 
-            ws.OnMessage -= MessageSocket;
-            ws.OnMessage += MessageSocket;
+            if (!form1.dos)
+            {
+                ws.OnMessage -= MessageSocket;
+                ws.OnMessage += MessageSocket;
+            }
 
             try
             {
